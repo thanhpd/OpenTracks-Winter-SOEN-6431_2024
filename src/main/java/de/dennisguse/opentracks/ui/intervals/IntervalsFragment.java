@@ -97,6 +97,16 @@ public class IntervalsFragment extends Fragment {
         return viewBinding.getRoot();
     }
 
+    /**
+     * This method is deprecated.
+     *
+     * This method is marked as deprecated and should be re-implemented with updated functionality.
+     * Deprecated methods are discouraged from use as they may be removed or replaced in future versions.
+     * Developers are advised to find alternative approaches or update the method to meet current requirements.
+     *
+     * @deprecated  This method is deprecated and should be re-implemented.
+     *
+     */
     @Deprecated //TODO This method must be re-implemented.
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
