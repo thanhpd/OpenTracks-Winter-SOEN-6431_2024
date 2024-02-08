@@ -147,7 +147,6 @@ public class MarkerEditActivity extends AbstractActivity {
                                 viewBinding.markerEditMarkerType.getText().toString(),
                                 viewBinding.markerEditDescription.getText().toString());
                     }
-                }
                 });
 
         takePictureFromGallery = registerForActivityResult(
