@@ -38,7 +38,7 @@ public class FilterDialogFragment extends DialogFragment {
         filterDialogFragment.show(fragmentManager, TAG);
     }
 
-    public static void showDialog(FragmentManager fragmentManager, ArrayList<FilterItem> items) {
+    public static void showDialog(FragmentManager fragmentManager, List<FilterItem> items) {
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList(KEY_FILTER_ITEMS, items);
 
