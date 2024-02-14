@@ -18,6 +18,11 @@ public class RecordingLayoutIO {
     private static final String YES_VALUE = "1";
     private static final String NOT_VALUE = "0";
 
+    // Private constructor to hide the implicit public one
+    private RecordingLayoutIO() {
+        throw new AssertionError("This class should not be instantiated.");
+    }
+    
     public static RecordingLayout fromCsv(@NonNull String csvLine, @NonNull Resources resources) {
         List<String> csvParts = CsvLayoutUtils.getCsvLineParts(csvLine);
         if (csvParts == null) {
