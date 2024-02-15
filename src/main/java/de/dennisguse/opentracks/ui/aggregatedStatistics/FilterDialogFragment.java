@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import de.dennisguse.opentracks.R;
@@ -40,7 +41,7 @@ public class FilterDialogFragment extends DialogFragment {
 
     public static void showDialog(FragmentManager fragmentManager, List<FilterItem> items) {
         Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList(KEY_FILTER_ITEMS, items);
+        bundle.putParcelableArrayList(KEY_FILTER_ITEMS,(ArrayList<? extends Parcelable>) items);
 
         FilterDialogFragment filterDialogFragment = new FilterDialogFragment();
         filterDialogFragment.setArguments(bundle);
