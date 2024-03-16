@@ -2,7 +2,11 @@ package de.dennisguse.opentracks.settings;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.preference.EditTextPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import de.dennisguse.opentracks.R;
@@ -29,6 +33,14 @@ public class ProfileSettingsFragment extends PreferenceFragmentCompat {
     @Override
     public void onResume() {
         super.onResume();
+        EditTextPreference nickNameInput = findPreference(getString(R.string.settings_profile_nickname_key));
+        nickNameInput.setDialogTitle(getString(R.string.settings_profile_nickname_dialog_title));
+        nickNameInput.setOnBindEditTextListener(editText -> {
+            editText.setSingleLine(true);
+            editText.selectAll(); // select all text
+            int maxNicknameLength = 20;
+            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxNicknameLength)});
+        });
         PreferencesUtils.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
     }
 
