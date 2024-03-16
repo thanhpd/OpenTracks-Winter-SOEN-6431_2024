@@ -412,6 +412,11 @@ limitations under the License.
     <string name="settings_announcements_average_speed_pace">Average speed/pace</string>
     <string name="settings_announcements_lap_speed_pace">Lap speed/pace</string>
 
+    <!-- Settings Profile -->
+    <string name="settings_profile_title">Profile</string>
+    <string name="settings_profile_summary">Profile management</string>
+    <string name="settings_profile_key">settingsProfile</string>
+
     <!-- Custom Layout -->
 
 
@@ -709,4 +714,6 @@ limitations under the License.
     <string name="always">Always</string>
 
     <string name="introduction_osm_dashboard">OpenTracks itself does not provide a map. Please install OSMDashboard to view your recordings on a map.</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

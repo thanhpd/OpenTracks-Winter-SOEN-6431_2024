@@ -15,6 +15,11 @@ public class MainSettingsFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.settings);
 
+        findPreference(getString(R.string.settings_profile_key)).setOnPreferenceClickListener(preference -> {
+            ((SettingsActivity) getActivity()).openScreen(getString(R.string.settings_profile_key));
+            return true;
+        });
+
         findPreference(getString(R.string.settings_defaults_key)).setOnPreferenceClickListener(preference -> {
             ((SettingsActivity) getActivity()).openScreen(getString(R.string.settings_defaults_key));
             return true;

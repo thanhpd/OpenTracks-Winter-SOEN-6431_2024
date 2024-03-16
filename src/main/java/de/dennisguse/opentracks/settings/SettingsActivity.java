@@ -82,6 +82,8 @@ public class SettingsActivity extends AbstractActivity implements ChooseActivity
 
         if (key.equals(getString(R.string.settings_defaults_key))) {
             fragment = new DefaultsSettingsFragment();
+        } else if (key.equals(getString(R.string.settings_profile_key))) {
+            fragment = new ProfileSettingsFragment();
         } else if (key.equals(getString(R.string.settings_ui_key))) {
             fragment = new UserInterfaceSettingsFragment();
         } else if (key.equals(getString(R.string.settings_gps_key))) {
