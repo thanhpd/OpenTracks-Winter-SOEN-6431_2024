@@ -855,4 +855,8 @@ public class PreferencesUtils {
         setInt(R.string.total_rows_deleted_key, 0);
     }
 
+    public static String getProfileNickname() {
+        return getString(R.string.settings_profile_nickname_key, "");
+    }
+
 }
