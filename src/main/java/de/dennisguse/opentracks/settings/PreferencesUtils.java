@@ -260,6 +260,10 @@ public class PreferencesUtils {
                 .orElse(SensorType.REMOTE);
     }
 
+    public static String getNickName(){
+        return getString(R.string.settings_profile_nickname_key, null);
+    } 
+    
     public static String getBarometerSensorAddress() {
         return getString(R.string.settings_sensor_bluetooth_pressure_key, getBluetoothSensorAddressNone());
     }
