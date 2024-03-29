@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.InputFilter;
 
 import androidx.preference.EditTextPreference;
+import androidx.preference.ListPreference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import de.dennisguse.opentracks.R;
@@ -20,6 +21,17 @@ public class ProfileSettingsFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.settings_profile);
+        ListPreference countryPreference = findPreference("country_preference_key");
+        countryPreference.setOnPreferenceChangeListener((preference, newValue) -> {
+            // Save the selected country to SharedPreferences
+            SharedPreferences.Editor editor = getPreferenceManager().getSharedPreferences().edit();
+            editor.putString("selected_country", (String) newValue);
+            editor.apply();
+
+            // Update summary with selected country
+            preference.setSummary((String) newValue);
+            return true;
+        });
     }
 
     @Override
@@ -40,6 +52,14 @@ public class ProfileSettingsFragment extends PreferenceFragmentCompat {
             editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxNicknameLength)});
         });
         PreferencesUtils.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
+
+        ListPreference countryPreference = findPreference("country_preference_key");
+        SharedPreferences sharedPreferences = getPreferenceManager().getSharedPreferences();
+        String selectedCountryValue = sharedPreferences.getString("selected_country", null);
+        if (selectedCountryValue != null) {
+            // Update summary with saved selected country
+            countryPreference.setSummary(selectedCountryValue);
+        }
     }
 
     @Override

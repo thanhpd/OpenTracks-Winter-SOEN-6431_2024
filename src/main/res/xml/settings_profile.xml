@@ -8,4 +8,12 @@
         android:key="@string/settings_profile_nickname_key"
         android:title="@string/settings_profile_nickname"
         app:useSimpleSummaryProvider="true" />
+    <ListPreference
+        android:key="country_preference_key"
+        android:title="Select Country"
+        android:entries="@array/countries_array"
+        android:defaultValue="Select Country"
+        android:entryValues="@array/countries_array_values"
+
+        />
 </PreferenceScreen>
