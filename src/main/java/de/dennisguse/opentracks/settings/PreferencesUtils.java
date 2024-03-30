@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2012 Google Inc.
  *
@@ -14,7 +15,9 @@
  * the License.
  */
 
+
 package de.dennisguse.opentracks.settings;
+
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -25,10 +28,12 @@ import android.content.res.TypedArray;
 import android.net.Uri;
 import android.util.Log;
 
+
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
+
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -38,6 +43,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 
 import de.dennisguse.opentracks.R;
 import de.dennisguse.opentracks.data.models.ActivityType;
@@ -54,6 +60,11 @@ import de.dennisguse.opentracks.ui.customRecordingLayout.RecordingLayout;
 import de.dennisguse.opentracks.ui.customRecordingLayout.RecordingLayoutIO;
 import de.dennisguse.opentracks.util.IntentDashboardUtils;
 
+
+import android.content.SharedPreferences;
+import android.content.res.Resources;
+
+
 /**
  * Utilities to access preferences stored in {@link SharedPreferences}.
  *
@@ -61,16 +72,51 @@ import de.dennisguse.opentracks.util.IntentDashboardUtils;
  */
 public class PreferencesUtils {
 
+
     private final static String TAG = PreferencesUtils.class.getSimpleName();
 
+
     private static final int PREFERENCES_VERSION = 2;
+
 
     private PreferencesUtils() {
     }
 
+
     private static SharedPreferences sharedPreferences;
 
+
     private static Resources resources;
+
+
+
+
+
+
+    private static final String SELECTED_COUNTRY_KEY = "selected_country";
+
+
+    public static void saveSelectedCountry(SharedPreferences sharedPreferences, String selectedCountry) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(SELECTED_COUNTRY_KEY, selectedCountry);
+        editor.apply();
+    }
+
+
+    public static String getSelectedCountry(SharedPreferences sharedPreferences) {
+        return sharedPreferences.getString(SELECTED_COUNTRY_KEY, null);
+    }
+
+
+    public static boolean isKey(Resources resources, int resId, String key) {
+        return key.equals(resources.getString(resId));
+    }
+
+
+    public static String getString(Resources resources, int resId) {
+        return resources.getString(resId);
+    }
+
 
     /**
      * Must be called during application startup.
@@ -79,25 +125,31 @@ public class PreferencesUtils {
         PreferencesUtils.resources = resources;
         PreferencesUtils.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
+
         PreferencesOpenHelper.newInstance(PREFERENCES_VERSION).check();
     }
+
 
     public static void registerOnSharedPreferenceChangeListener(SharedPreferences.OnSharedPreferenceChangeListener changeListener) {
         sharedPreferences.registerOnSharedPreferenceChangeListener(changeListener);
         changeListener.onSharedPreferenceChanged(sharedPreferences, null);
     }
 
+
     public static void unregisterOnSharedPreferenceChangeListener(SharedPreferences.OnSharedPreferenceChangeListener changeListener) {
         sharedPreferences.unregisterOnSharedPreferenceChangeListener(changeListener);
     }
+
 
     public static String getDefaultActivityTypeLocalized() {
         return getString(R.string.default_activity_key, resources.getString(R.string.default_activity_default));
     }
 
+
     public static void setDefaultActivityLocalized(String newDefaultActivity) {
         setString(R.string.default_activity_key, newDefaultActivity);
     }
+
 
     /**
      * Gets a preference key
@@ -107,6 +159,7 @@ public class PreferencesUtils {
     private static String getKey(int keyId) {
         return resources.getString(keyId);
     }
+
 
     /**
      * Compares if keyId and key belong to the same shared preference key.
@@ -119,6 +172,7 @@ public class PreferencesUtils {
         return key == null || key.equals(getKey(keyId));
     }
 
+
     public static boolean isKey(int[] keyIds, String key) {
         for (int keyId : keyIds) {
             if (isKey(keyId, key)) {
@@ -128,9 +182,11 @@ public class PreferencesUtils {
         return false;
     }
 
+
     private static boolean getBoolean(int keyId, boolean defaultValue) {
         return sharedPreferences.getBoolean(getKey(keyId), defaultValue);
     }
+
 
     static int getInt(int keyId, int defaultValue) {
         try {
@@ -138,6 +194,7 @@ public class PreferencesUtils {
         } catch (ClassCastException e) {
             //Ignore
         }
+
 
         //NOTE: We assume that the data was stored as String due to use of ListPreference.
         try {
@@ -148,12 +205,14 @@ public class PreferencesUtils {
         }
     }
 
+
     private static float getFloat(int keyId, float defaultValue) {
         try {
             return sharedPreferences.getFloat(getKey(keyId), defaultValue);
         } catch (ClassCastException e) {
             //Ignore
         }
+
 
         //NOTE: We assume that the data was stored as String due to use of ListPreference.
         try {
@@ -164,9 +223,11 @@ public class PreferencesUtils {
         }
     }
 
+
     public static String getString(int keyId, String defaultValue) {
         return sharedPreferences.getString(getKey(keyId), defaultValue);
     }
+
 
     @VisibleForTesting
     public static void setString(int keyId, String value) {
@@ -175,10 +236,12 @@ public class PreferencesUtils {
         editor.apply();
     }
 
+
     @VisibleForTesting
     public static void setString(int keyId, int valueId) {
         setString(keyId, resources.getString(valueId));
     }
+
 
     @VisibleForTesting
     public static void setBoolean(int keyId, Boolean value) {
@@ -187,30 +250,37 @@ public class PreferencesUtils {
         editor.apply();
     }
 
+
     static void setInt(int keyId, int value) {
         Editor editor = sharedPreferences.edit();
         editor.putInt(getKey(keyId), value);
         editor.apply();
     }
 
+
     public static boolean isPublicAPIenabled() {
         return getBoolean(R.string.publicapi_enabled_key, resources.getBoolean(R.bool.publicapi_enabled_default));
     }
+
 
     public static boolean isPublicAPIDashboardEnabled() {
         return getBoolean(R.string.publicapi_dashboard_enabled_key, resources.getBoolean(R.bool.publicapi_dashboard_enabled_default));
     }
 
+
     public static boolean shouldShowIntroduction() {
         return getBoolean(R.string.show_introduction_screen_key, resources.getBoolean(R.bool.show_introduction_screen_default));
     }
+
 
     public static void setShowIntroduction(boolean introduction) {
         setBoolean(R.string.show_introduction_screen_key, introduction);
     }
 
+
     public static UnitSystem getUnitSystem() {
         final String STATS_UNIT_DEFAULT = resources.getString(R.string.stats_units_default);
+
 
         final String VALUE = getString(R.string.stats_units_key, STATS_UNIT_DEFAULT);
         return Arrays.stream(UnitSystem.values())
@@ -219,9 +289,11 @@ public class PreferencesUtils {
                 .orElse(UnitSystem.defaultUnitSystem()); //TODO This AGAIN defines the default
     }
 
+
     public static void setUnit(UnitSystem unitSystem) {
         setString(R.string.stats_units_key, unitSystem.getPreferenceId());
     }
+
 
     //TODO Check if actually needed or can be superseeded by a flexible default in getUnit()
     public static void applyDefaultUnit() {
@@ -234,6 +306,7 @@ public class PreferencesUtils {
         }
     }
 
+
     public static boolean isReportSpeed(String activityTypeLocalized) {
         final String STATS_RATE_DEFAULT = resources.getString(R.string.stats_rate_default);
         String currentStatsRate = getString(R.string.stats_rate_key, STATS_RATE_DEFAULT);
@@ -242,16 +315,20 @@ public class PreferencesUtils {
                     .isShowSpeedPreferred();
         }
 
+
         return currentStatsRate.equals(resources.getString(R.string.stats_rate_speed));
     }
+
 
     public static boolean isReportSpeed(Track track) {
         return isReportSpeed(track.getActivityTypeLocalized());
     }
 
+
     private static String getBluetoothSensorAddressNone() {
         return SensorType.NONE.getPreferenceValue();
     }
+
 
     public static SensorType getSensorType(String address) {
         return Arrays.stream(SensorType.values())
@@ -260,39 +337,52 @@ public class PreferencesUtils {
                 .orElse(SensorType.REMOTE);
     }
 
+
+    public static String getNickName(){
+        return getString(R.string.settings_profile_nickname_key, null);
+    }
+
     public static String getBarometerSensorAddress() {
         return getString(R.string.settings_sensor_bluetooth_pressure_key, getBluetoothSensorAddressNone());
     }
+
 
     public static String getBluetoothHeartRateSensorAddress() {
         return getString(R.string.settings_sensor_bluetooth_heart_rate_key, getBluetoothSensorAddressNone());
     }
 
+
     public static String getBluetoothCyclingCadenceSensorAddress() {
         return getString(R.string.settings_sensor_bluetooth_cycling_cadence_key, getBluetoothSensorAddressNone());
     }
 
+
     public static String getBluetoothCyclingSpeedSensorAddress() {
         return getString(R.string.settings_sensor_bluetooth_cycling_speed_key, getBluetoothSensorAddressNone());
     }
+
 
     public static Distance getWheelCircumference() {
         final int DEFAULT = Integer.parseInt(resources.getString(R.string.settings_sensor_bluetooth_cycling_speed_wheel_circumference_default));
         return Distance.ofMM(getInt(R.string.settings_sensor_bluetooth_cycling_speed_wheel_circumference_key, DEFAULT));
     }
 
+
     public static String getBluetoothCyclingPowerSensorAddress() {
         return getString(R.string.settings_sensor_bluetooth_cycling_power_key, getBluetoothSensorAddressNone());
     }
+
 
     public static String getBluetoothRunningSpeedAndCadenceAddress() {
         return getString(R.string.settings_sensor_bluetooth_running_speed_and_cadence_key, getBluetoothSensorAddressNone());
     }
 
+
     public static boolean getBluetoothFilterEnabled() {
         final boolean DEFAULT = resources.getBoolean(R.bool.settings_sensor_bluetooth_service_filter_enabled_default);
         return getBoolean(R.string.settings_sensor_bluetooth_service_filter_enabled_key, DEFAULT);
     }
+
 
     public static HeartRateZones getHeartRateZones() {
         final int DEFAULT = Integer.parseInt(resources.getString(R.string.settings_sensor_heart_rate_max_default));
@@ -300,40 +390,48 @@ public class PreferencesUtils {
         return new HeartRateZones(HeartRate.of(value));
     }
 
+
     public static boolean shouldShowStatsOnLockscreen() {
         final boolean STATS_SHOW_ON_LOCKSCREEN_DEFAULT = resources.getBoolean(R.bool.stats_show_on_lockscreen_while_recording_default);
         return getBoolean(R.string.stats_show_on_lockscreen_while_recording_key, STATS_SHOW_ON_LOCKSCREEN_DEFAULT);
     }
+
 
     public static boolean shouldKeepScreenOn() {
         final boolean DEFAULT = resources.getBoolean(R.bool.stats_keep_screen_on_while_recording_default);
         return getBoolean(R.string.stats_keep_screen_on_while_recording_key, DEFAULT);
     }
 
+
     public static boolean shouldUseFullscreen() {
         final boolean DEFAULT = resources.getBoolean(R.bool.stats_fullscreen_while_recording_default);
         return getBoolean(R.string.stats_fullscreen_while_recording_key, DEFAULT);
     }
+
 
     public static boolean shouldUseDynamicColors() {
         final boolean DEFAULT = resources.getBoolean(R.bool.settings_ui_dynamic_colors_default);
         return getBoolean(R.string.settings_ui_dynamic_colors_key, DEFAULT);
     }
 
+
     public static boolean shouldVoiceAnnouncementOnDeviceSpeaker() {
         final boolean DEFAULT = resources.getBoolean(R.bool.voice_on_device_speaker_default);
         return getBoolean(R.string.voice_on_device_speaker_key, DEFAULT);
     }
 
+
     public static boolean shouldVoiceAnnouncementIdle() {
         return getBoolean(R.string.voice_announce_idle_key, true);
     }
+
 
     public static Duration getVoiceAnnouncementFrequency() {
         final int DEFAULT = Integer.parseInt(resources.getString(R.string.voice_announcement_frequency_default));
         int value = getInt(R.string.voice_announcement_frequency_key, DEFAULT);
         return Duration.ofSeconds(value);
     }
+
 
     static String[] getVoiceAnnouncementFrequencyEntries() {
         String[] values = resources.getStringArray(R.array.voice_announcement_frequency_values);
@@ -349,6 +447,7 @@ public class PreferencesUtils {
         return options;
     }
 
+
     /**
      * @return Result depends on getUnitSystem
      */
@@ -358,6 +457,7 @@ public class PreferencesUtils {
         return Distance.one(getUnitSystem()).multipliedBy(value);
     }
 
+
     /**
      * @return Result depends on getUnitSystem
      */
@@ -365,6 +465,7 @@ public class PreferencesUtils {
         String[] values = resources.getStringArray(R.array.voice_announcement_distance_values);
         String[] options = new String[values.length];
         UnitSystem unitSystem = getUnitSystem();
+
 
         DistanceFormatter formatter = DistanceFormatter.Builder()
                 .setDecimalCount(0)
@@ -381,83 +482,102 @@ public class PreferencesUtils {
         return options;
     }
 
+
     public static float getVoiceSpeedRate() {
         final float DEFAULT = Float.parseFloat(resources.getString(R.string.voice_speed_rate_default));
         return getFloat(R.string.voice_speed_rate_key, DEFAULT);
     }
 
+
     public static boolean shouldVoiceAnnounceTotalDistance() {
         return getBoolean(R.string.voice_announce_total_distance_key, true);
     }
+
 
     @VisibleForTesting
     public static void setVoiceAnnounceTotalDistance(boolean value) {
         setBoolean(R.string.voice_announce_total_distance_key, value);
     }
 
+
     public static boolean shouldVoiceAnnounceMovingTime() {
         return getBoolean(R.string.voice_announce_moving_time_key, true);
     }
+
 
     @VisibleForTesting
     public static void setVoiceAnnounceMovingTime(boolean value) {
         setBoolean(R.string.voice_announce_moving_time_key, value);
     }
 
+
     public static boolean shouldVoiceAnnounceAverageSpeedPace() {
         return getBoolean(R.string.voice_announce_average_speed_pace_key, true);
     }
+
 
     @VisibleForTesting
     public static void setVoiceAnnounceAverageSpeedPace(boolean value) {
         setBoolean(R.string.voice_announce_average_speed_pace_key, value);
     }
 
+
     public static boolean shouldVoiceAnnounceLapSpeedPace() {
         return getBoolean(R.string.voice_announce_lap_speed_pace_key, true);
     }
+
 
     @VisibleForTesting
     public static void setVoiceAnnounceLapSpeedPace(boolean value) {
         setBoolean(R.string.voice_announce_lap_speed_pace_key, value);
     }
 
+
     public static boolean shouldVoiceAnnounceLapHeartRate() {
         return getBoolean(R.string.voice_announce_lap_heart_rate_key, false);
     }
+
 
     @VisibleForTesting
     public static void setVoiceAnnounceLapHeartRate(boolean value) {
         setBoolean(R.string.voice_announce_lap_heart_rate_key, value);
     }
 
+
     public static boolean shouldVoiceAnnounceAverageHeartRate() {
         return getBoolean(R.string.voice_announce_average_heart_rate_key, false);
     }
+
 
     @VisibleForTesting
     public static void setVoiceAnnounceAverageHeartRate(boolean value) {
         setBoolean(R.string.voice_announce_average_heart_rate_key, value);
     }
 
+
     public static Distance getRecordingDistanceInterval() {
         return Distance.of(getInt(R.string.recording_distance_interval_key, getRecordingDistanceIntervalDefaultInternal()));
     }
+
 
     public static Distance getRecordingDistanceIntervalDefault() {
         return Distance.of(getRecordingDistanceIntervalDefaultInternal());
     }
 
+
     private static int getRecordingDistanceIntervalDefaultInternal() {
         return Integer.parseInt(resources.getString(R.string.recording_distance_interval_default));
     }
+
 
     static String[] getRecordingDistanceIntervalEntries() {
         String[] entryValues = resources.getStringArray(R.array.recording_distance_interval_values);
         String[] entries = new String[entryValues.length];
 
+
         final int recordingDistanceIntervalDefault = (int) getRecordingDistanceIntervalDefault().toM();
         UnitSystem unitSystem = getUnitSystem();
+
 
         DistanceFormatter formatter = DistanceFormatter.Builder()
                 .setUnit(unitSystem)
@@ -467,6 +587,7 @@ public class PreferencesUtils {
         for (int i = 0; i < entryValues.length; i++) {
             int value = Integer.parseInt(entryValues[i]);
             Distance distance = Distance.of(1).multipliedBy(value);
+
 
             String displayValue = formatter.formatDistance(distance);
             switch (unitSystem) {
@@ -488,20 +609,25 @@ public class PreferencesUtils {
             }
         }
 
+
         return entries;
     }
+
 
     public static Distance getMaxRecordingDistance() {
         final int MAX_RECORDING_DISTANCE = Integer.parseInt(resources.getString(R.string.max_recording_distance_default));
         return Distance.of(getInt(R.string.max_recording_distance_key, MAX_RECORDING_DISTANCE));
     }
 
+
     static String[] getMaxRecordingDistanceEntries() {
         String[] entryValues = resources.getStringArray(R.array.max_recording_distance_values);
         String[] entries = new String[entryValues.length];
 
+
         final int maxRecordingDistanceDefault = Integer.parseInt(resources.getString(R.string.max_recording_distance_default));
         UnitSystem unitSystem = getUnitSystem();
+
 
         DistanceFormatter formatter = DistanceFormatter.Builder()
                 .setDecimalCount(0)
@@ -511,6 +637,7 @@ public class PreferencesUtils {
         for (int i = 0; i < entryValues.length; i++) {
             int value = Integer.parseInt(entryValues[i]);
             Distance distance = Distance.of(1).multipliedBy(value);
+
 
             String displayValue = formatter.formatDistance(distance);
             switch (unitSystem) {
@@ -532,17 +659,21 @@ public class PreferencesUtils {
             }
         }
 
+
         return entries;
     }
+
 
     public static Duration getMinRecordingInterval() {
         final Duration MIN_RECORDING_INTERVAL = getMinRecordingIntervalDefault();
         return Duration.ofSeconds(getInt(R.string.min_recording_interval_key, (int) MIN_RECORDING_INTERVAL.getSeconds()));
     }
 
+
     public static Duration getMinRecordingIntervalDefault() {
         return Duration.ofSeconds(Integer.parseInt(resources.getString(R.string.min_recording_interval_default)));
     }
+
 
     static String[] getMinRecordingIntervalEntries() {
         String[] entryValues = resources.getStringArray(R.array.min_recording_interval_values);
@@ -551,6 +682,7 @@ public class PreferencesUtils {
         for (int i = 0; i < entryValues.length; i++) {
             int value = Integer.parseInt(entryValues[i]);
 
+
             if (value == recommended) {
                 entries[i] = resources.getString(R.string.value_smallest_recommended);
             } else {
@@ -558,23 +690,29 @@ public class PreferencesUtils {
             }
         }
 
+
         return entries;
     }
+
 
     public static Distance getThresholdHorizontalAccuracy() {
         final int RECORDING_GPS_ACCURACY = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_default));
         return Distance.of(getInt(R.string.recording_gps_accuracy_key, RECORDING_GPS_ACCURACY));
     }
 
+
     static String[] getThresholdHorizontalAccuracyEntries() {
         String[] entryValues = resources.getStringArray(R.array.recording_gps_accuracy_values);
         String[] entries = new String[entryValues.length];
+
 
         final int recordingGPSAccuracyDefault = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_default));
         final int recordingGPSAccuracyExcellent = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_excellent));
         final int recordingGPSAccuracyPoor = Integer.parseInt(resources.getString(R.string.recording_gps_accuracy_poor));
 
+
         UnitSystem unitSystem = getUnitSystem();
+
 
         DistanceFormatter formatter = DistanceFormatter.Builder()
                 .setDecimalCount(0)
@@ -582,9 +720,11 @@ public class PreferencesUtils {
                 .setUnit(unitSystem)
                 .build(resources);
 
+
         for (int i = 0; i < entryValues.length; i++) {
             int value = Integer.parseInt(entryValues[i]);
             Distance distance = Distance.of(1).multipliedBy(value);
+
 
             String displayValue = formatter.formatDistance(distance);
             switch (unitSystem) {
@@ -612,8 +752,10 @@ public class PreferencesUtils {
             }
         }
 
+
         return entries;
     }
+
 
     public static Duration getIdleDurationTimeout() {
         final int DEFAULT = Integer.parseInt(resources.getString(R.string.idle_duration_default));
@@ -621,14 +763,18 @@ public class PreferencesUtils {
         return Duration.ofSeconds(value);
     }
 
+
     static String[] getIdleDurationEntries() {
         String[] entryValues = resources.getStringArray(R.array.idle_duration_values);
         String[] entries = new String[entryValues.length];
 
+
         final int idleDurationDefault = Integer.parseInt(resources.getString(R.string.idle_duration_default));
+
 
         for (int i = 0; i < entryValues.length; i++) {
             int value = Integer.parseInt(entryValues[i]);
+
 
             if (value == idleDurationDefault) {
                 entries[i] = resources.getString(R.string.value_int_seconds, value);
@@ -637,14 +783,18 @@ public class PreferencesUtils {
             }
         }
 
+
         return entries;
     }
+
+
 
 
     public static boolean shouldInstantExportAfterWorkout() {
         final boolean INSTANT_POST_WORKOUT_EXPORT_DEFAULT = resources.getBoolean(R.bool.post_workout_export_enabled_default);
         return getBoolean(R.string.post_workout_export_enabled_key, INSTANT_POST_WORKOUT_EXPORT_DEFAULT) && isDefaultExportDirectoryUri();
     }
+
 
     public static TrackFilenameGenerator getTrackFileformatGenerator() {
         String DEFAULT = resources.getString(R.string.export_filename_format_default);
@@ -656,6 +806,7 @@ public class PreferencesUtils {
         }
     }
 
+
     public static TrackFileFormat getExportTrackFileFormat() {
         final String TRACKFILEFORMAT_NAME_DEFAULT = getString(R.string.export_trackfileformat_default, null);
         String trackFileFormatName = getString(R.string.export_trackfileformat_key, TRACKFILEFORMAT_NAME_DEFAULT);
@@ -664,10 +815,12 @@ public class PreferencesUtils {
                 .findFirst().orElse(TrackFileFormat.KMZ_WITH_TRACKDETAIL_AND_SENSORDATA_AND_PICTURES);
     }
 
+
     public static boolean getPreventReimportTracks() {
         final boolean defaultValue = getBoolean(R.bool.import_prevent_reimport_default, false);
         return getBoolean(R.string.import_prevent_reimport_key, defaultValue);
     }
+
 
     /**
      * @return {@link androidx.appcompat.app.AppCompatDelegate}.MODE_*
@@ -676,8 +829,10 @@ public class PreferencesUtils {
         final String defaultValue = getKey(R.string.night_mode_default);
         final String value = getString(R.string.night_mode_key, defaultValue);
 
+
         return Integer.parseInt(value);
     }
+
 
     public static void resetPreferences(Context context, boolean readAgain) {
         if (readAgain) {
@@ -686,6 +841,7 @@ public class PreferencesUtils {
         }
         PreferenceManager.setDefaultValues(context, R.xml.settings, readAgain);
     }
+
 
     public static Uri getDefaultExportDirectoryUri() {
         String singleExportDirectory = getString(R.string.settings_default_export_directory_key, null);
@@ -701,20 +857,25 @@ public class PreferencesUtils {
         return null;
     }
 
+
     public static void setDefaultExportDirectoryUri(Uri directoryUri) {
         String value = directoryUri != null ? directoryUri.toString() : null;
         Log.d(TAG, "Set ExportDirectoryUri: " + directoryUri);
 
+
         setString(R.string.settings_default_export_directory_key, value);
     }
+
 
     public static boolean isDefaultExportDirectoryUri() {
         return getDefaultExportDirectoryUri() != null;
     }
 
+
     public static int getLayoutColumnsByDefault() {
         return resources.getInteger(R.integer.stats_custom_layout_columns_default);
     }
+
 
     private static List<TypedArray> getMultiTypedArray() {
         return Stream.of(
@@ -740,6 +901,7 @@ public class PreferencesUtils {
         ).map(id -> resources.obtainTypedArray(id)).collect(Collectors.toList());
     }
 
+
     @SuppressLint("ResourceType")
     private static String buildDefaultFields() {
         List<TypedArray> fieldsArrays = getMultiTypedArray();
@@ -747,13 +909,16 @@ public class PreferencesUtils {
                 + CsvLayoutUtils.ITEM_SEPARATOR;
     }
 
+
     static String buildDefaultLayout() {
         return resources.getString(R.string.stats_custom_layout_default_layout) + CsvLayoutUtils.ITEM_SEPARATOR + getLayoutColumnsByDefault() + CsvLayoutUtils.ITEM_SEPARATOR + buildDefaultFields();
     }
 
+
     public static String getDefaultLayoutName() {
         return resources.getString(R.string.stats_custom_layout_default_layout);
     }
+
 
     /**
      * @return custom layout selected or the first one if any has been selected or the one selected is not exists anymore.
@@ -766,6 +931,7 @@ public class PreferencesUtils {
             return RecordingLayoutIO.fromCsv(csvLines[0], resources);
         }
 
+
         for (String line : csvLines) {
             RecordingLayout recordingLayout = RecordingLayoutIO.fromCsv(line, resources);
             if (recordingLayout.sameName(layoutSelected)) {
@@ -773,12 +939,15 @@ public class PreferencesUtils {
             }
         }
 
+
         return RecordingLayoutIO.fromCsv(csvLines[0], resources);
     }
+
 
     public static void updateCustomLayouts(@NonNull List<RecordingLayout> recordingLayouts) {
         setString(R.string.stats_custom_layouts_key, RecordingLayoutIO.toCSV(recordingLayouts));
     }
+
 
     public static void updateCustomLayout(@NonNull RecordingLayout recordingLayout) {
         List<RecordingLayout> preferenceRecordingLayouts = PreferencesUtils.getAllCustomLayouts();
@@ -790,15 +959,18 @@ public class PreferencesUtils {
         }
     }
 
+
     public static void addCustomLayout(@NonNull String layoutName) {
         String newLayoutCsv = layoutName + CsvLayoutUtils.ITEM_SEPARATOR + getLayoutColumnsByDefault() + CsvLayoutUtils.ITEM_SEPARATOR + buildDefaultFields();
         String customLayoutCsv = getString(R.string.stats_custom_layouts_key, buildDefaultLayout()) + CsvLayoutUtils.LINE_SEPARATOR + newLayoutCsv;
         setString(R.string.stats_custom_layouts_key, customLayoutCsv);
     }
 
+
     public static void setDefaultLayout(String layoutName) {
         setString(R.string.stats_custom_layout_selected_layout_key, layoutName);
     }
+
 
     public static List<RecordingLayout> getAllCustomLayouts() {
         List<RecordingLayout> recordingLayouts = new ArrayList<>();
@@ -808,12 +980,15 @@ public class PreferencesUtils {
             recordingLayouts.add(RecordingLayoutIO.fromCsv(line, resources));
         }
 
+
         return recordingLayouts;
     }
+
 
     public static List<String> getAllCustomLayoutNames() {
         return getAllCustomLayouts().stream().map(RecordingLayout::getName).collect(Collectors.toList());
     }
+
 
     public static void resetCustomLayoutPreferences() {
         if (sharedPreferences.contains(resources.getString(R.string.stats_custom_layouts_key))) {
@@ -823,9 +998,11 @@ public class PreferencesUtils {
         }
     }
 
+
     public static void applyNightMode() {
         AppCompatDelegate.setDefaultNightMode(PreferencesUtils.getDefaultNightMode());
     }
+
 
     //TODO Check if resetPreferences can be used instead.
     @Deprecated
@@ -834,25 +1011,31 @@ public class PreferencesUtils {
         sharedPreferences.edit().clear().commit();
     }
 
+
     public static void setShowOnMapFormat(final String showOnMapFormat) {
         setString(R.string.show_on_map_format_key, showOnMapFormat);
     }
+
 
     public static String getShowOnMapFormat() {
         return getString(R.string.show_on_map_format_key, IntentDashboardUtils.PREFERENCE_ID_ASK);
     }
 
+
     public static int getTotalRowsDeleted() {
         return getInt(R.string.total_rows_deleted_key, 0);
     }
+
 
     public static void addTotalRowsDeleted(final int totalRowsDeletedToAdd) {
         int newTotalRowsDeleted = getTotalRowsDeleted() + totalRowsDeletedToAdd;
         setInt(R.string.total_rows_deleted_key, newTotalRowsDeleted);
     }
 
+
     public static void resetTotalRowsDeleted() {
         setInt(R.string.total_rows_deleted_key, 0);
     }
+
 
 }
