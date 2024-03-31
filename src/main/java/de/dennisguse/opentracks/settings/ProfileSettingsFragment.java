@@ -28,24 +28,15 @@ public class ProfileSettingsFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.settings_profile);
-        ListPreference countryPreference = findPreference("country_preference_key");
-        String defaultCountry = getResources().getString(R.string.default_country_value); // Set your default country value here
-        countryPreference.setDefaultValue(defaultCountry);
+        ListPreference countryPreference = findPreference(getString(R.string.settings_profile_country_key));
 
 
-        SharedPreferences sharedPreferences = getPreferenceManager().getSharedPreferences();
-        String selectedCountryValue = PreferencesUtils.getSelectedCountry(sharedPreferences);
-        if (selectedCountryValue != null) {
-            countryPreference.setSummary(selectedCountryValue);
-        } else {
-            countryPreference.setSummary(defaultCountry);
-        }
-
+        String selectedCountryValue = PreferencesUtils.getSelectedCountry();
+        countryPreference.setSummary(selectedCountryValue);
 
         countryPreference.setOnPreferenceChangeListener((preference, newValue) -> {
             // Save the selected country to SharedPreferences
-            PreferencesUtils.saveSelectedCountry(getPreferenceManager().getSharedPreferences(), (String) newValue);
-
+            PreferencesUtils.setSelectedCountry((String) newValue);
 
             // Update summary with selected country
             preference.setSummary((String) newValue);
@@ -64,27 +55,13 @@ public class ProfileSettingsFragment extends PreferenceFragmentCompat {
     @Override
     public void onResume() {
         super.onResume();
-        EditTextPreference nickNameInput = findPreference(getString(R.string.settings_profile_nickname_key));
-        nickNameInput.setDialogTitle(getString(R.string.settings_profile_nickname_dialog_title));
-        nickNameInput.setOnBindEditTextListener(editText -> {
-            editText.setSingleLine(true);
-            editText.selectAll(); // select all text
-            int maxNicknameLength = 20;
-            editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxNicknameLength)});
-        });
-        PreferencesUtils.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
 
-
-        String countryKey = "country_preference_key";
-        ListPreference countryPreference = findPreference(countryKey);
-        SharedPreferences sharedPreferences = getPreferenceManager().getSharedPreferences();
-        String selectedCountryValue = PreferencesUtils.getSelectedCountry(sharedPreferences);
-        if (selectedCountryValue != null) {
+        ListPreference countryPreference = findPreference(getString(R.string.settings_profile_country_key));
+        String selectedCountryValue = PreferencesUtils.getSelectedCountry();
+        if (selectedCountryValue != null && !selectedCountryValue.isEmpty()) {
             // Update summary with saved selected country
             countryPreference.setSummary(selectedCountryValue);
         }
-
-
     }
 
 
