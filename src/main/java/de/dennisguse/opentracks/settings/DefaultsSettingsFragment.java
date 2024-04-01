@@ -10,6 +10,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -54,8 +55,8 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
     @Override
     public void onResume() {
         super.onResume();
-        PreferencesUtils.registerOnSharedPreferenceChangeListener(sharedPreferenceChangeListener);
         updateUnits();
+        updateSkiSeasonStartPreferenceSummary(); // This will update the summary on resume
     }
 
     @Override
@@ -82,6 +83,7 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
     }
   
     private void showCustomDatePickerDialog() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = getLayoutInflater().inflate(R.layout.custom_date_picker_dialog, null);
         builder.setView(dialogView);
@@ -89,56 +91,75 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
         NumberPicker monthPicker = dialogView.findViewById(R.id.monthPicker);
         NumberPicker dayPicker = dialogView.findViewById(R.id.dayPicker);
         Preference preference = findPreference(getString(R.string.ski_season_start_key));
+        String defaultStartDate = prefs.getString(getString(R.string.ski_season_start_key), "09-01");
     
-        // Set month and day from preferences if exists
+        // Initialize month and day pickers
         String[] months = new DateFormatSymbols().getShortMonths();
         monthPicker.setMinValue(0);
         monthPicker.setMaxValue(months.length - 1);
         monthPicker.setDisplayedValues(months);
     
-        int defaultMonth = 8; 
-        int defaultDay = 1;
+        dayPicker.setMinValue(1);
+        dayPicker.setMaxValue(31);
     
-        // Extracting stored month and day if available
-        String storedDate = preference.getSummary().toString();
-        if (!storedDate.isEmpty()) {
-            String[] parts = storedDate.split(" ");
-            if (parts.length == 2) {
-                defaultDay = Integer.parseInt(parts[0]);
-                defaultMonth = Arrays.asList(months).indexOf(parts[1]) + 1;
-            }
-        }
-    
-        monthPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
-            updateDayPicker(dayPicker, newVal);
-        });
-    
-        updateDayPicker(dayPicker, defaultMonth - 1); 
-        monthPicker.setValue(defaultMonth - 1);
+        // Parse and set the default or saved date
+        String[] dateParts = defaultStartDate.split("-");
+        int defaultMonth = Integer.parseInt(dateParts[0]) - 1;
+        int defaultDay = Integer.parseInt(dateParts[1]);
+        monthPicker.setValue(defaultMonth);
         dayPicker.setValue(defaultDay);
     
+        // Define dialog buttons
         builder.setTitle("Select Date");
         builder.setPositiveButton("OK", (dialog, which) -> {
             int selectedMonth = monthPicker.getValue();
             int selectedDay = dayPicker.getValue();
-    
-            String selectedDate = String.format(Locale.getDefault(), "%02d %s", selectedDay, months[selectedMonth]);
-            if (preference != null) {
-                preference.setSummary(selectedDate);
-            }
+            String selectedDate = String.format(Locale.getDefault(), "%02d-%02d", selectedMonth + 1, selectedDay);
+            
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(getString(R.string.ski_season_start_key), selectedDate);
+            editor.apply();
+        
+            // Update the summary text after saving the new date
+            updateSkiSeasonStartPreferenceSummary();
         });
     
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+    
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-    
-    private void updateDayPicker(NumberPicker dayPicker, int month) {
-        int maxDay = getMaxDayOfMonth(month);
-        dayPicker.setMaxValue(maxDay);
-        dayPicker.setMinValue(1);
+
+    private void ensureDefaultSkiSeasonStartDate() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        if (!prefs.contains(getString(R.string.ski_season_start_key))) {
+            // Set the default date only if it hasn't been set before
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(getString(R.string.ski_season_start_key), "09-01");
+            editor.apply();
+        }
     }
-    
+
+    private void updateSkiSeasonStartPreferenceSummary() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        Preference preference = findPreference(getString(R.string.ski_season_start_key));
+
+        // The ensureDefaultSkiSeasonStartDate() method makes sure that a default is always set
+        ensureDefaultSkiSeasonStartDate();
+
+        String date = prefs.getString(getString(R.string.ski_season_start_key), "09-01");
+        String[] dateParts = date.split("-");
+        int monthIndex = Integer.parseInt(dateParts[0]) - 1;
+        // Ensure the format is correctly applied to display as "Sep 1"
+        String readableDate = new DateFormatSymbols().getMonths()[monthIndex].substring(0, 3) + " " + Integer.parseInt(dateParts[1]);
+
+        if (preference != null) {
+            preference.setSummary(readableDate);
+        }
+    }
+
+
+
 
     private int getMaxDayOfMonth(int month) {
         // Get the maximum day for the given month
