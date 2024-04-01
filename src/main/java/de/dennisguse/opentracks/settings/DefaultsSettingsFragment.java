@@ -13,6 +13,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -89,30 +90,32 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
         NumberPicker dayPicker = dialogView.findViewById(R.id.dayPicker);
         Preference preference = findPreference(getString(R.string.ski_season_start_key));
     
+        // Set month and day from preferences if exists
         String[] months = new DateFormatSymbols().getShortMonths();
         monthPicker.setMinValue(0);
         monthPicker.setMaxValue(months.length - 1);
         monthPicker.setDisplayedValues(months);
     
-        // Assuming the date format in the summary is "dd MMM"
-        String currentDate = preference.getSummary().toString();
-        if (!currentDate.isEmpty()) {
-            Calendar cal = Calendar.getInstance();
-            try {
-                cal.setTime(new SimpleDateFormat("dd MMM", Locale.getDefault()).parse(currentDate));
-                int currentMonth = cal.get(Calendar.MONTH);
-                int currentDay = cal.get(Calendar.DAY_OF_MONTH);
+        int defaultMonth = 8; 
+        int defaultDay = 1;
     
-                monthPicker.setValue(currentMonth);
-                updateDayPicker(dayPicker, currentMonth);
-    
-                dayPicker.setValue(currentDay);
-            } catch (Exception e) {
-                e.printStackTrace();
+        // Extracting stored month and day if available
+        String storedDate = preference.getSummary().toString();
+        if (!storedDate.isEmpty()) {
+            String[] parts = storedDate.split(" ");
+            if (parts.length == 2) {
+                defaultDay = Integer.parseInt(parts[0]);
+                defaultMonth = Arrays.asList(months).indexOf(parts[1]) + 1;
             }
         }
     
-        monthPicker.setOnValueChangedListener((picker, oldVal, newVal) -> updateDayPicker(dayPicker, newVal));
+        monthPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            updateDayPicker(dayPicker, newVal);
+        });
+    
+        updateDayPicker(dayPicker, defaultMonth - 1); 
+        monthPicker.setValue(defaultMonth - 1);
+        dayPicker.setValue(defaultDay);
     
         builder.setTitle("Select Date");
         builder.setPositiveButton("OK", (dialog, which) -> {
@@ -133,13 +136,14 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
     private void updateDayPicker(NumberPicker dayPicker, int month) {
         int maxDay = getMaxDayOfMonth(month);
         dayPicker.setMaxValue(maxDay);
+        dayPicker.setMinValue(1);
     }
     
 
     private int getMaxDayOfMonth(int month) {
         // Get the maximum day for the given month
         Calendar calendar = Calendar.getInstance();
-        calendar.clear();  // Clear all fields to prevent interference from previous configurations
+        calendar.clear(); 
         calendar.set(Calendar.MONTH, month);
         return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
