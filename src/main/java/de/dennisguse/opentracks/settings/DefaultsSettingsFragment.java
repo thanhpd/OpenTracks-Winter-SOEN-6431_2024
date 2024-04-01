@@ -19,11 +19,20 @@ import java.util.Locale;
 import de.dennisguse.opentracks.R;
 import de.dennisguse.opentracks.data.models.ActivityType;
 import de.dennisguse.opentracks.fragments.ChooseActivityTypeDialogFragment;
+import android.content.Context;
+import android.content.SharedPreferences;
+
 
 public class DefaultsSettingsFragment extends PreferenceFragmentCompat implements ChooseActivityTypeDialogFragment.ChooseActivityTypeCaller {
 
     // Used to forward update from ChooseActivityTypeDialogFragment; TODO Could be replaced with LiveData.
     private ActivityTypePreference.ActivityPreferenceDialog activityPreferenceDialog;
+    private static final String PREFS_NAME = "DatePickerPrefs";
+    private static final String KEY_LAST_SELECTED_MONTH = "lastSelectedMonth";
+    private static final String KEY_LAST_SELECTED_DAY = "lastSelectedDay";
+    int lastSelectedMonth=9;
+    int lastSelectedDay=1;
+
 
     private final SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener = (sharedPreferences, key) -> {
         if (PreferencesUtils.isKey(R.string.stats_units_key, key)) {
@@ -79,6 +88,19 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
 
         super.onDisplayPreferenceDialog(preference);
     }
+    private void saveLastSelectedDate(Context context, int month, int day) {
+        SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
+        editor.putInt(KEY_LAST_SELECTED_MONTH, month);
+        editor.putInt(KEY_LAST_SELECTED_DAY, day);
+        editor.apply();
+    }
+
+    private void loadLastSelectedDate(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        lastSelectedMonth = prefs.getInt(KEY_LAST_SELECTED_MONTH, 0); // Default to January if not found
+        lastSelectedDay = prefs.getInt(KEY_LAST_SELECTED_DAY, 1); // Default to 1 if not found
+    }
+
     private void showCustomDatePickerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = getLayoutInflater().inflate(R.layout.custom_date_picker_dialog, null);
@@ -101,8 +123,11 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
             System.out.println("New Value: " + newVal + ", Old Value: " + oldVal + ", Max Day: " + maxDay);
         });
 
-// Set initial max day for the initial month
-        int initialMonth = monthPicker.getValue();
+        // Load last selected date
+        loadLastSelectedDate(requireContext());
+
+        // Set initial max day for the initial month
+        int initialMonth = lastSelectedMonth; // Use last selected month
         int maxDay = getMaxDayOfMonth(initialMonth);
         dayPicker.setMaxValue(maxDay);
         System.out.println("Initial Month: " + initialMonth + ", Max Day: " + maxDay);
@@ -110,8 +135,9 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
         // Customize day picker
         dayPicker.setMinValue(1);
 
-        monthPicker.setValue(8);
-        dayPicker.setValue(1);
+        // Set last selected values
+        monthPicker.setValue(lastSelectedMonth);
+        dayPicker.setValue(lastSelectedDay);
 
         builder.setTitle("Select Date");
         builder.setPositiveButton("OK", (dialog, which) -> {
@@ -124,6 +150,9 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
                 // Set summary to display the selected date
                 preference.setSummary(selectedDate);
             }
+
+            // Store the selected values for next time
+            saveLastSelectedDate(requireContext(), selectedMonth, selectedDay);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
