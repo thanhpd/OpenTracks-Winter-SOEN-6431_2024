@@ -91,44 +91,59 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
         NumberPicker monthPicker = dialogView.findViewById(R.id.monthPicker);
         NumberPicker dayPicker = dialogView.findViewById(R.id.dayPicker);
         Preference preference = findPreference(getString(R.string.ski_season_start_key));
+        
         String defaultStartDate = prefs.getString(getString(R.string.ski_season_start_key), "09-01");
     
-        // Initialize month and day pickers
-        String[] months = new DateFormatSymbols().getShortMonths();
+        // Initialize month picker
+        String[] months = new DateFormatSymbols().getMonths();  // Full months array
         monthPicker.setMinValue(0);
         monthPicker.setMaxValue(months.length - 1);
         monthPicker.setDisplayedValues(months);
     
+        // Initialize day picker with maximum value based on the month
+        int month = Integer.parseInt(defaultStartDate.split("-")[0]) - 1;
+        int day = Integer.parseInt(defaultStartDate.split("-")[1]);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.MONTH, month);
+        dayPicker.setMaxValue(calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
         dayPicker.setMinValue(1);
-        dayPicker.setMaxValue(31);
     
-        // Parse and set the default or saved date
-        String[] dateParts = defaultStartDate.split("-");
-        int defaultMonth = Integer.parseInt(dateParts[0]) - 1;
-        int defaultDay = Integer.parseInt(dateParts[1]);
-        monthPicker.setValue(defaultMonth);
-        dayPicker.setValue(defaultDay);
+        // Set current values
+        monthPicker.setValue(month);
+        dayPicker.setValue(Math.min(day, dayPicker.getMaxValue()));  // Ensure day is within the valid range
     
-        // Define dialog buttons
+        monthPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            // Adjust the maximum number of days according to the selected month
+            calendar.set(Calendar.MONTH, newVal);
+            int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+            dayPicker.setMaxValue(maxDay);
+    
+            // Adjust day value if it exceeds the max day for the new month
+            if (dayPicker.getValue() > maxDay) {
+                dayPicker.setValue(maxDay);
+            }
+        });
+    
         builder.setTitle("Select Date");
         builder.setPositiveButton("OK", (dialog, which) -> {
+            // Save selected date and update summary
             int selectedMonth = monthPicker.getValue();
             int selectedDay = dayPicker.getValue();
             String selectedDate = String.format(Locale.getDefault(), "%02d-%02d", selectedMonth + 1, selectedDay);
-            
+    
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString(getString(R.string.ski_season_start_key), selectedDate);
             editor.apply();
-        
-            // Update the summary text after saving the new date
+    
+            // Update the preference summary
             updateSkiSeasonStartPreferenceSummary();
         });
     
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-    
+        builder.setNegativeButton("Cancel", null);
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+    
 
     private void ensureDefaultSkiSeasonStartDate() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
