@@ -79,58 +79,62 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
 
         super.onDisplayPreferenceDialog(preference);
     }
+  
     private void showCustomDatePickerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = getLayoutInflater().inflate(R.layout.custom_date_picker_dialog, null);
         builder.setView(dialogView);
-
+    
         NumberPicker monthPicker = dialogView.findViewById(R.id.monthPicker);
         NumberPicker dayPicker = dialogView.findViewById(R.id.dayPicker);
         Preference preference = findPreference(getString(R.string.ski_season_start_key));
-
-        // Customize month picker
+    
         String[] months = new DateFormatSymbols().getShortMonths();
         monthPicker.setMinValue(0);
         monthPicker.setMaxValue(months.length - 1);
-        monthPicker.setDisplayedValues(months); // Display month names
-
-        // Customize day picker based on the selected month
-        monthPicker.setOnValueChangedListener((picker, oldVal, newVal) -> {
-            int maxDay = getMaxDayOfMonth(newVal); // Get the maximum day for the selected month
-            dayPicker.setMaxValue(maxDay);
-            System.out.println("New Value: " + newVal + ", Old Value: " + oldVal + ", Max Day: " + maxDay);
-        });
-
-// Set initial max day for the initial month
-        int initialMonth = monthPicker.getValue();
-        int maxDay = getMaxDayOfMonth(initialMonth);
-        dayPicker.setMaxValue(maxDay);
-        System.out.println("Initial Month: " + initialMonth + ", Max Day: " + maxDay);
-
-        // Customize day picker
-        dayPicker.setMinValue(1);
-
-        monthPicker.setValue(8);
-        dayPicker.setValue(1);
-
+        monthPicker.setDisplayedValues(months);
+    
+        // Assuming the date format in the summary is "dd MMM"
+        String currentDate = preference.getSummary().toString();
+        if (!currentDate.isEmpty()) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd MMM", Locale.getDefault()).parse(currentDate));
+                int currentMonth = cal.get(Calendar.MONTH);
+                int currentDay = cal.get(Calendar.DAY_OF_MONTH);
+    
+                monthPicker.setValue(currentMonth);
+                updateDayPicker(dayPicker, currentMonth);
+    
+                dayPicker.setValue(currentDay);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    
+        monthPicker.setOnValueChangedListener((picker, oldVal, newVal) -> updateDayPicker(dayPicker, newVal));
+    
         builder.setTitle("Select Date");
         builder.setPositiveButton("OK", (dialog, which) -> {
             int selectedMonth = monthPicker.getValue();
             int selectedDay = dayPicker.getValue();
-
+    
             String selectedDate = String.format(Locale.getDefault(), "%02d %s", selectedDay, months[selectedMonth]);
-
             if (preference != null) {
-                // Set summary to display the selected date
                 preference.setSummary(selectedDate);
             }
         });
-
+    
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+    
+    private void updateDayPicker(NumberPicker dayPicker, int month) {
+        int maxDay = getMaxDayOfMonth(month);
+        dayPicker.setMaxValue(maxDay);
+    }
+    
 
     private int getMaxDayOfMonth(int month) {
         // Get the maximum day for the given month
