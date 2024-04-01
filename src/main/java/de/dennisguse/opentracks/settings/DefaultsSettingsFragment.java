@@ -19,20 +19,11 @@ import java.util.Locale;
 import de.dennisguse.opentracks.R;
 import de.dennisguse.opentracks.data.models.ActivityType;
 import de.dennisguse.opentracks.fragments.ChooseActivityTypeDialogFragment;
-import android.content.Context;
-import android.content.SharedPreferences;
-
 
 public class DefaultsSettingsFragment extends PreferenceFragmentCompat implements ChooseActivityTypeDialogFragment.ChooseActivityTypeCaller {
 
     // Used to forward update from ChooseActivityTypeDialogFragment; TODO Could be replaced with LiveData.
     private ActivityTypePreference.ActivityPreferenceDialog activityPreferenceDialog;
-    private static final String PREFS_NAME = "DatePickerPrefs";
-    private static final String KEY_LAST_SELECTED_MONTH = "lastSelectedMonth";
-    private static final String KEY_LAST_SELECTED_DAY = "lastSelectedDay";
-    int lastSelectedMonth=9;
-    int lastSelectedDay=1;
-
 
     private final SharedPreferences.OnSharedPreferenceChangeListener sharedPreferenceChangeListener = (sharedPreferences, key) -> {
         if (PreferencesUtils.isKey(R.string.stats_units_key, key)) {
@@ -88,19 +79,6 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
 
         super.onDisplayPreferenceDialog(preference);
     }
-    private void saveLastSelectedDate(Context context, int month, int day) {
-        SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
-        editor.putInt(KEY_LAST_SELECTED_MONTH, month);
-        editor.putInt(KEY_LAST_SELECTED_DAY, day);
-        editor.apply();
-    }
-
-    private void loadLastSelectedDate(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        lastSelectedMonth = prefs.getInt(KEY_LAST_SELECTED_MONTH, 0); // Default to January if not found
-        lastSelectedDay = prefs.getInt(KEY_LAST_SELECTED_DAY, 1); // Default to 1 if not found
-    }
-
     private void showCustomDatePickerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = getLayoutInflater().inflate(R.layout.custom_date_picker_dialog, null);
@@ -123,11 +101,8 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
             System.out.println("New Value: " + newVal + ", Old Value: " + oldVal + ", Max Day: " + maxDay);
         });
 
-        // Load last selected date
-        loadLastSelectedDate(requireContext());
-
-        // Set initial max day for the initial month
-        int initialMonth = lastSelectedMonth; // Use last selected month
+// Set initial max day for the initial month
+        int initialMonth = monthPicker.getValue();
         int maxDay = getMaxDayOfMonth(initialMonth);
         dayPicker.setMaxValue(maxDay);
         System.out.println("Initial Month: " + initialMonth + ", Max Day: " + maxDay);
@@ -135,24 +110,31 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
         // Customize day picker
         dayPicker.setMinValue(1);
 
-        // Set last selected values
-        monthPicker.setValue(lastSelectedMonth);
-        dayPicker.setValue(lastSelectedDay);
+        String skiSeasonStartDate = PreferencesUtils.getSkiSeasonStartDate();
+
+        // Parse the date to extract month and day
+        String[] dateParts = skiSeasonStartDate.split("-");
+        int lastSelectedmonth = Integer.parseInt(dateParts[0]) - 1; // Subtract 1 as Calendar months are 0-indexed
+        int lastSelectedday = Integer.parseInt(dateParts[1]);
+
+        // Set the values to the pickers
+        monthPicker.setValue(lastSelectedmonth);
+        dayPicker.setValue(lastSelectedday);
 
         builder.setTitle("Select Date");
         builder.setPositiveButton("OK", (dialog, which) -> {
             int selectedMonth = monthPicker.getValue();
             int selectedDay = dayPicker.getValue();
+            String setSelectedDate = String.format(Locale.getDefault(), "%02d-%02d", selectedMonth + 1, selectedDay);
 
+// Set the selected date as the ski season start date
+            PreferencesUtils.setSkiSeasonStartDate(setSelectedDate);
             String selectedDate = String.format(Locale.getDefault(), "%02d %s", selectedDay, months[selectedMonth]);
 
             if (preference != null) {
                 // Set summary to display the selected date
                 preference.setSummary(selectedDate);
             }
-
-            // Store the selected values for next time
-            saveLastSelectedDate(requireContext(), selectedMonth, selectedDay);
         });
 
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
