@@ -421,8 +421,8 @@ limitations under the License.
     <string name="settings_profile_title">Profile</string>
     <string name="settings_profile_summary">Profile management</string>
     <string name="settings_profile_key" translatable="false">settingsProfile</string>
-    <string name="settings_profile_nickname">Nickname</string>
-    <string name="settings_profile_nickname_dialog_title">Nickname (max 20 char)</string>
+    <string name="settings_profile_country">Country</string>
+    <string name="settings_profile_country_key" translatable="false">country</string>
     <string name="settings_profile_nickname_key" translatable="false">nickname</string>
 
     <!-- Custom Layout -->
