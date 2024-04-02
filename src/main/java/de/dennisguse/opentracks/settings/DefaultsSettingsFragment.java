@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.NumberPicker;
-import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
 import androidx.preference.ListPreference;
@@ -13,8 +12,6 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -83,16 +80,14 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
     }
   
     private void showCustomDatePickerDialog() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         View dialogView = getLayoutInflater().inflate(R.layout.custom_date_picker_dialog, null);
         builder.setView(dialogView);
     
         NumberPicker monthPicker = dialogView.findViewById(R.id.monthPicker);
         NumberPicker dayPicker = dialogView.findViewById(R.id.dayPicker);
-        Preference preference = findPreference(getString(R.string.ski_season_start_key));
         
-        String defaultStartDate = prefs.getString(getString(R.string.ski_season_start_key), "09-01");
+        String defaultStartDate = PreferencesUtils.getSkiSeasonStartDate();
     
         // Initialize month picker
         String[] months = new DateFormatSymbols().getMonths();  // Full months array
@@ -130,10 +125,8 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
             int selectedMonth = monthPicker.getValue();
             int selectedDay = dayPicker.getValue();
             String selectedDate = String.format(Locale.getDefault(), "%02d-%02d", selectedMonth + 1, selectedDay);
-    
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString(getString(R.string.ski_season_start_key), selectedDate);
-            editor.apply();
+
+            PreferencesUtils.setSkiSeasonStartDate(selectedDate);
     
             // Update the preference summary
             updateSkiSeasonStartPreferenceSummary();
@@ -149,20 +142,17 @@ public class DefaultsSettingsFragment extends PreferenceFragmentCompat implement
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         if (!prefs.contains(getString(R.string.ski_season_start_key))) {
             // Set the default date only if it hasn't been set before
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putString(getString(R.string.ski_season_start_key), "09-01");
-            editor.apply();
+            PreferencesUtils.setSkiSeasonStartDate("09-01");
         }
     }
 
     private void updateSkiSeasonStartPreferenceSummary() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
         Preference preference = findPreference(getString(R.string.ski_season_start_key));
 
         // The ensureDefaultSkiSeasonStartDate() method makes sure that a default is always set
         ensureDefaultSkiSeasonStartDate();
 
-        String date = prefs.getString(getString(R.string.ski_season_start_key), "09-01");
+        String date = PreferencesUtils.getSkiSeasonStartDate();
         String[] dateParts = date.split("-");
         int monthIndex = Integer.parseInt(dateParts[0]) - 1;
         // Ensure the format is correctly applied to display as "Sep 1"
