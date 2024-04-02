@@ -3,6 +3,10 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:title="@string/settings_profile_title">
+    <de.dennisguse.opentracks.settings.ImageViewPreference
+        android:key="@string/settings_profile_profile_picture_key"
+        android:layout="@layout/profile_picture_layout" />
+
     <EditTextPreference
         android:inputType="text"
         android:key="@string/settings_profile_nickname_key"

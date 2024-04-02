@@ -461,6 +461,9 @@ limitations under the License.
     <string name="settings_profile_nickname_key" translatable="false">nickname</string>
     <string name="settings_profile_country">Country</string>
     <string name="settings_profile_country_key" translatable="false">country</string>
+    <string name="settings_profile_profile_picture_title">Profile picture</string>
+    <string name="settings_profile_profile_picture_key">profilePicture</string>
+    <string name="settings_profile_profile_picture_nickname">profilePictureNickname</string>
 
     <!-- Run RRelated Data -->
     <string name="settings_announcements_average_slope_run">Average slope</string>  

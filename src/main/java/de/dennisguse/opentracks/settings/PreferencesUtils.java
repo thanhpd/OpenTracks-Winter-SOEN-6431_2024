@@ -492,7 +492,7 @@ public class PreferencesUtils {
     public static boolean shouldVoiceAnnounceMaxSlope() {
         return getBoolean(R.string.voice_announce_max_slope_key, true);
     }
-    
+
     @VisibleForTesting
     public static void setVoiceAnnounceMaxSlope(boolean value) {
         setBoolean(R.string.voice_announce_max_slope_key, value);
@@ -507,12 +507,12 @@ public class PreferencesUtils {
     public static void setVoiceAnnounceMaxSpeedRecording(boolean value) {
         setBoolean(R.string.voice_announce_max_speed_recording_key, value);
     }
-	
+
 	// recoding related setting helper methods
     public static boolean shouldVoiceAnnounceTimeSkiedRecording() {
         return getBoolean(R.string.voice_announce_time_skied_recording_key, true);
     }
-	
+
 	@VisibleForTesting
     public static void setVoiceAnnounceTimeSkiedRecording(boolean value) {
         setBoolean(R.string.voice_announce_time_skied_recording_key, value);
@@ -969,6 +969,10 @@ public class PreferencesUtils {
         setString(R.string.settings_profile_country_key, selectedCountry);
     }
 
+    public static String getProfileNickname() {
+        return getString(R.string.settings_profile_nickname_key, "");
+    }
+
     public static void addCustomActivity(Context context, String activityName) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         String existingActivities = prefs.getString(context.getString(R.string.key_custom_activities), "");
@@ -983,8 +987,5 @@ public class PreferencesUtils {
         String activitiesString = prefs.getString(context.getString(R.string.key_custom_activities), "");
         return Arrays.asList(activitiesString.split(";"));
     }
-
-
-
 
 }
