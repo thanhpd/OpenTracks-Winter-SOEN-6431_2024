@@ -342,7 +342,7 @@ limitations under the License.
 
     <string name="settings_open_tracks_summary">All About OpenTracks Project</string>
 
-    <string name="settings_defaults_title">Default Units and Activity</string>
+    <string name="settings_defaults_title">Default Units and Activity1</string>
     <string name="settings_defaults_summary">Preferred Units, Default Activity, Track Default Name</string>
 
     <string name="settings_ui_title">User Interface</string>
